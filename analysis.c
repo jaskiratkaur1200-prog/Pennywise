@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <string.h>
 
@@ -5,22 +6,70 @@ struct Expense
 {
     int id;
     char category[20];
-    char description[50];
     float amount;
 };
 
-struct Expense e[100];
+struct Expense a1[100];
 
 int count = 0;
-int nextId = 1;
-
-float income = 0;
-float budget = 0;
+float income, budget;
 
 
-// FUNCTION 1: CALCULATE TOTAL EXPENSE
+// FUNCTION 1: ADD EXPENSE
 
-float totalExpense();
+void addExpense()
+{
+    int ch;
+
+    if(count >= 100)
+    {
+        printf("Expense limit reached!\n");
+        return;
+    }
+
+    printf("\n1. Food\n2. Transport\n3. Shopping\n");
+    printf("4. Entertainment\n5. Education\n6. Other\n");
+
+    printf("Enter category: ");
+    scanf("%d", &ch);
+
+    switch(ch)
+    {
+        case 1: strcpy(a1[count].category, "Food"); break;
+        case 2: strcpy(a1[count].category, "Transport"); break;
+        case 3: strcpy(a1[count].category, "Shopping"); break;
+        case 4: strcpy(a1[count].category, "Entertainment"); break;
+        case 5: strcpy(a1[count].category, "Education"); break;
+        case 6: strcpy(a1[count].category, "Other"); break;
+
+        default:
+            printf("Invalid category!\n");
+            return;
+    }
+
+    printf("Enter amount: ");
+
+    if(scanf("%f", &a1[count].amount) != 1)
+    {
+        printf("Invalid amount!\n");
+        while(getchar() != '\n');
+        return;
+    }
+
+    if(a1[count].amount <= 0)
+    {
+        printf("Amount must be greater than zero!\n");
+        return;
+    }
+
+    a1[count].id = count + 1;
+    count++;
+
+    printf("Expense added successfully!\n");
+}
+
+
+// FUNCTION 2: TOTAL EXPENSE
 
 float totalExpense()
 {
@@ -29,65 +78,64 @@ float totalExpense()
 
     for(i = 0; i < count; i++)
     {
-        total = total + e[i].amount;
+        total = total + a1[i].amount;
     }
 
     return total;
 }
 
 
-// FUNCTION 2: FINANCIAL SUMMARY
+// FUNCTION 3: VIEW EXPENSES
 
-void financialSummary();
-
-void financialSummary()
+void viewExpenses()
 {
-    float total;
+    int i;
 
-    total = totalExpense();
-
-    printf("\n========== FINANCIAL SUMMARY ==========\n");
-
-    printf("Total Income: Rs %.2f\n", income);
-
-    printf("Total Expenses: Rs %.2f\n", total);
-
-    printf("Available Balance: Rs %.2f\n",
-           income - total);
-
-    if(budget > 0)
+    if(count == 0)
     {
-        printf("Monthly Budget: Rs %.2f\n", budget);
-
-        printf("Remaining Budget: Rs %.2f\n",
-               budget - total);
+        printf("\nNo expenses recorded!\n");
+        return;
     }
-    else
+
+    printf("\n========== ALL EXPENSES ==========\n");
+
+    for(i = 0; i < count; i++)
     {
-        printf("Monthly Budget: Not set\n");
+        printf("\nID: %d", a1[i].id);
+        printf("\nCategory: %s", a1[i].category);
+        printf("\nAmount: Rs %.2f\n", a1[i].amount);
     }
 }
 
 
-// FUNCTION 3: CATEGORY ANALYSIS
+// FUNCTION 4: FINANCIAL SUMMARY
 
-void categoryAnalysis();
+void financialSummary()
+{
+    float total = totalExpense();
+
+    printf("\n========== FINANCIAL SUMMARY ==========\n");
+
+    printf("Total Income: Rs %.2f\n", income);
+    printf("Total Expenses: Rs %.2f\n", total);
+    printf("Available Balance: Rs %.2f\n", income - total);
+    printf("Remaining Budget: Rs %.2f\n", budget - total);
+}
+
+
+// FUNCTION 5: CATEGORY ANALYSIS
 
 void categoryAnalysis()
 {
     char categories[6][20] =
     {
-        "Food",
-        "Transport",
-        "Shopping",
-        "Entertainment",
-        "Education",
-        "Other"
+        "Food", "Transport", "Shopping",
+        "Entertainment", "Education", "Other"
     };
 
     float totals[6] = {0};
 
-    int i, j, highest = 0;
+    int i, j;
 
     if(count == 0)
     {
@@ -99,9 +147,9 @@ void categoryAnalysis()
     {
         for(j = 0; j < 6; j++)
         {
-            if(strcmp(e[i].category, categories[j]) == 0)
+            if(strcmp(a1[i].category, categories[j]) == 0)
             {
-                totals[j] = totals[j] + e[i].amount;
+                totals[j] = totals[j] + a1[i].amount;
             }
         }
     }
@@ -110,139 +158,110 @@ void categoryAnalysis()
 
     for(i = 0; i < 6; i++)
     {
-        printf("%s: Rs %.2f\n",
-               categories[i], totals[i]);
+        printf("%s: Rs %.2f\n", categories[i], totals[i]);
     }
-
-    for(i = 1; i < 6; i++)
-    {
-        if(totals[i] > totals[highest])
-        {
-            highest = i;
-        }
-    }
-
-    printf("\nHighest Spending Category: %s\n",
-           categories[highest]);
-
-    printf("Highest Spending Amount: Rs %.2f\n",
-           totals[highest]);
 }
 
 
-// FUNCTION 4: BUDGET ALERT
-
-void budgetAlert();
+// FUNCTION 6: BUDGET ALERT
 
 void budgetAlert()
 {
-    float total, percentage;
-
-    if(budget <= 0)
-    {
-        printf("\nPlease set your monthly budget first!\n");
-        return;
-    }
-
-    total = totalExpense();
-
-    percentage = (total / budget) * 100;
+    float total = totalExpense();
 
     printf("\n========== BUDGET ALERT ==========\n");
 
-    printf("Monthly Budget: Rs %.2f\n", budget);
+    printf("Budget Used: %.2f%%\n", (total / budget) * 100);
 
-    printf("Total Spent: Rs %.2f\n", total);
-
-    printf("Budget Used: %.2f%%\n", percentage);
-
-    if(percentage >= 100)
+    if(total >= budget)
     {
-        printf("\nALERT: Budget limit reached or exceeded!\n");
+        printf("ALERT! Budget limit reached or exceeded.\n");
     }
-    else if(percentage >= 80)
+    else if(total >= budget * 0.8)
     {
-        printf("\nWARNING: 80%% or more of your budget used!\n");
-    }
-    else if(percentage >= 50)
-    {
-        printf("\nNOTICE: Half or more of your budget used.\n");
+        printf("WARNING! 80%% of budget used.\n");
     }
     else
     {
-        printf("\nGOOD: Your spending is under control.\n");
+        printf("You are within your budget.\n");
     }
 }
 
 
-// FUNCTION 5: SAVINGS SUGGESTIONS
+// MAIN FUNCTION
 
-void savingsSuggestion();
-
-void savingsSuggestion()
+int main()
 {
-    float food = 0;
-    float shopping = 0;
-    float entertainment = 0;
+    int choice;
 
-    float total;
-    int i;
+    printf("Enter Monthly Income: Rs ");
 
-    total = totalExpense();
-
-    if(total == 0)
+    if(scanf("%f", &income) != 1 || income < 0)
     {
-        printf("\nNo expenses recorded yet!\n");
-        return;
+        printf("Invalid income!\n");
+        return 0;
     }
 
-    for(i = 0; i < count; i++)
+    printf("Enter Monthly Budget: Rs ");
+
+    if(scanf("%f", &budget) != 1 || budget <= 0)
     {
-        if(strcmp(e[i].category, "Food") == 0)
+        printf("Invalid budget!\n");
+        return 0;
+    }
+
+    do
+    {
+        printf("\n\n========== EXPENSE TRACKER ==========\n");
+
+        printf("1. Add Expense\n");
+        printf("2. View Expenses\n");
+        printf("3. Financial Summary\n");
+        printf("4. Category Analysis\n");
+        printf("5. Budget Alert\n");
+        printf("6. Exit\n");
+
+        printf("\nEnter your choice: ");
+
+        if(scanf("%d", &choice) != 1)
         {
-            food = food + e[i].amount;
+            printf("Invalid input!\n");
+            while(getchar() != '\n');
+            choice = 0;
+            continue;
         }
-        else if(strcmp(e[i].category, "Shopping") == 0)
+
+        switch(choice)
         {
-            shopping = shopping + e[i].amount;
+            case 1:
+                addExpense();
+                break;
+
+            case 2:
+                viewExpenses();
+                break;
+
+            case 3:
+                financialSummary();
+                break;
+
+            case 4:
+                categoryAnalysis();
+                break;
+
+            case 5:
+                budgetAlert();
+                break;
+
+            case 6:
+                printf("\nThank you for using Expense Tracker!\n");
+                break;
+
+            default:
+                printf("\nInvalid choice! Try again.\n");
         }
-        else if(strcmp(e[i].category, "Entertainment") == 0)
-        {
-            entertainment = entertainment + e[i].amount;
-        }
-    }
 
-    printf("\n========== SAVINGS SUGGESTIONS ==========\n");
+    } while(choice != 6);
 
-    if(food > total * 0.40)
-    {
-        printf("Food spending is high.\n");
-        printf("Try reducing outside food expenses.\n\n");
-    }
-
-    if(shopping > total * 0.30)
-    {
-        printf("Shopping spending is high.\n");
-        printf("Avoid unnecessary purchases.\n\n");
-    }
-
-    if(entertainment > total * 0.25)
-    {
-        printf("Entertainment spending is high.\n");
-        printf("Try setting an entertainment spending limit.\n\n");
-    }
-
-    if(budget > 0 && total > budget)
-    {
-        printf("You have exceeded your monthly budget.\n");
-        printf("Reduce non-essential expenses.\n\n");
-    }
-
-    if(budget > 0 && total < budget * 0.50)
-    {
-        printf("Great! You are spending less than half "
-               "of your budget.\n\n");
-    }
-
-    printf("Keep tracking your expenses regularly!\n");
+    return 0;
 }
